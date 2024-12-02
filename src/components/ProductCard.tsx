@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Product } from "../models/Product";
-import RatingStar from "./RatingStar";
+// import RatingStar from "./RatingStar";
 import { addToCart } from "../redux/features/cartSlice";
 import { useAppDispatch } from "../redux/hooks";
 import toast from "react-hot-toast";
@@ -12,10 +12,10 @@ import useAuth from "../hooks/useAuth";
 const ProductCard: FC<Product> = ({
   id,
   price,
-  thumbnail,
+  imageUrl,
   title,
   category,
-  rating,
+  // rating,
   discountPercentage,
 }) => {
   const dispatch = useAppDispatch();
@@ -29,8 +29,8 @@ const ProductCard: FC<Product> = ({
           price,
           title,
           category,
-          rating,
-          thumbnail,
+          // rating,
+          imageUrl,
           discountPercentage,
         })
       );
@@ -45,7 +45,7 @@ const ProductCard: FC<Product> = ({
       <div className="text-center border-b border-gray-200">
         <Link to={{ pathname: `/product/${id}` }}>
           <img
-            src={thumbnail}
+            src={imageUrl}
             alt={title}
             className="inline-block h-60 transition-transform duration-200 hover:scale-110"
           />
@@ -63,7 +63,7 @@ const ProductCard: FC<Product> = ({
         </Link>
       </div>
       <div className="px-8">
-        <RatingStar rating={rating} />
+        {/* <RatingStar rating={rating} /> */}
       </div>
       <div className="flex items-center justify-between px-8 pb-4">
         {discountPercentage && (

@@ -3,7 +3,7 @@ import { FC } from "react";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 
 const RatingStar: FC<{ rating: number }> = ({ rating }) => {
-  const ratingNum = parseFloat(rating.toString());
+  const ratingNum = 5;
   const main = Math.floor(ratingNum);
   const other = 5 - main;
 

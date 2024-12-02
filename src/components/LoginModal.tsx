@@ -1,6 +1,6 @@
-import { FC, FormEvent, useState } from "react";
+import { FC, FormEvent, useState, useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
-import { doLogin, updateModal } from "../redux/features/authSlice";
+import { doLogin, updateModal, initializeState } from "../redux/features/authSlice";
 import { FaUnlock } from "react-icons/fa";
 import { RiLockPasswordFill, RiUser3Fill } from "react-icons/ri";
 import { GiArchiveRegister } from "react-icons/gi";
@@ -12,6 +12,11 @@ const LoginModal: FC = () => {
   const [password, setPassword] = useState("");
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.authReducer.modalOpen);
+
+  useEffect(() => {
+    // Initialize the state from localStorage on component mount
+    dispatch(initializeState());
+  }, [dispatch]);
 
   const submitForm = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -101,6 +106,8 @@ const LoginModal: FC = () => {
       </div>
     );
   }
+
+  return null; // Return null if modal is not open
 };
 
 export default LoginModal;

@@ -1,58 +1,53 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import { addProducts } from "../redux/features/productSlice";
 import ProductCard from "../components/ProductCard";
 import { Product } from "../models/Product";
+import axiosInstance from "../config/axios.config";
 
 const AllProducts: FC = () => {
   const dispatch = useAppDispatch();
-  const sortRef = useRef<HTMLSelectElement>(null);
-  const [currentProducts, setCurrentProducts] = useState<Product[]>([]);
-  const allProducts = useAppSelector(
-    (state) => state.productReducer.allProducts
-  );
+  const [sortValue, setSortValue] = useState<string>("default");
+  
+  // Fetch products from Redux store
+  const allProducts = useAppSelector((state) => state.productReducer.allProducts);
 
-  useEffect(() => {
-    const fetchProducts = () => {
-      fetch("https://dummyjson.com/products?limit=500")
-        .then((res) => res.json())
-        .then(({ products }) => {
-          dispatch(addProducts(products));
-        });
-    };
+  // Fetch products on mount if they are not already in the store
+    useEffect(() => {
+      if (allProducts.length === 0) {
+        axiosInstance
+    .get("http://localhost:8080/identity/product/getAll", {
+    })
+    .then((response) => {
 
-    if (allProducts.length === 0) fetchProducts();
-  }, [allProducts, dispatch]);
+      const  products  = response.data.data;
+      
+      dispatch(addProducts(products)); // Lưu sản phẩm vào Redux store
+    })
+    .catch((error) => {
+      console.error("Lỗi khi lấy sản phẩm", error);
+    });
+      }
+    }, [allProducts.length, dispatch]);
 
-  useEffect(() => {
-    setCurrentProducts(allProducts);
-  }, [allProducts]);
-
-  const sortProducts = (sortValue: string) => {
-    if (sortValue === "asc") {
-      setCurrentProducts(
-        [...currentProducts].sort((a, b) => {
-          const aPrice =
-            a.price - (a.price * (a.discountPercentage ?? 0)) / 100;
-          const bPrice =
-            b.price - (b.price * (b.discountPercentage ?? 0)) / 100;
-          return aPrice - bPrice;
-        })
-      );
-    } else if (sortValue === "desc") {
-      setCurrentProducts(
-        [...currentProducts].sort((a, b) => {
-          const aPrice =
-            a.price - (a.price * (a.discountPercentage ?? 0)) / 100;
-          const bPrice =
-            b.price - (b.price * (b.discountPercentage ?? 0)) / 100;
-          return bPrice - aPrice;
-        })
-      );
-    } else {
-      setCurrentProducts([...currentProducts].sort((a, b) => a.id - b.id));
-    }
+  // Function to calculate price after discount
+  const getDiscountedPrice = (product: Product) => {
+    return product.price - (product.price * (product.discountPercentage ?? 0)) / 100;
   };
+
+  // Sort products based on sortValue
+  const sortedProducts = [...allProducts].sort((a, b) => {
+    const aPrice = getDiscountedPrice(a);
+    const bPrice = getDiscountedPrice(b);
+
+    if (sortValue === "asc") {
+      return aPrice - bPrice;
+    } else if (sortValue === "desc") {
+      return bPrice - aPrice;
+    } else {
+      return a.id - b.id; // Default sort by id
+    }
+  });
 
   return (
     <div className="container mx-auto min-h-[83vh] p-4 font-karla">
@@ -61,17 +56,19 @@ const AllProducts: FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-lg dark:text-white">Products</span>
             <select
-              ref={sortRef}
               className="border border-black dark:border-white rounded p-1 dark:text-white dark:bg-slate-600"
-              onChange={(e) => sortProducts(e.target.value)}
+              value={sortValue}
+              onChange={(e) => setSortValue(e.target.value)}
             >
               <option value="default">Default</option>
               <option value="asc">Price (low to high)</option>
               <option value="desc">Price (high to low)</option>
             </select>
           </div>
+
+          {/* Display products */}
           <div className="grid gap-4 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
-            {currentProducts.map((product) => (
+            {sortedProducts.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </div>

@@ -15,7 +15,7 @@ import useDiscount from "../hooks/useDiscount";
 
 const CartRow: FC<CartItem> = ({
   id,
-  thumbnail,
+  imageUrl,
   title,
   price,
   quantity,
@@ -28,7 +28,7 @@ const CartRow: FC<CartItem> = ({
 
   return (
     <div className="grid grid-cols-7 gap-3 border items-center">
-      <img src={thumbnail} alt="thumbnail" className="h-20 col-span-2" />
+      <img src={imageUrl} alt="imageUrl" className="h-20 col-span-2" />
       <div className="col-span-3">
         <h3 className="font-bold leading-4">{title}</h3>
         <div className="flex space-x-2 items-center">
@@ -55,7 +55,7 @@ const CartRow: FC<CartItem> = ({
                   title,
                   price,
                   quantity,
-                  thumbnail,
+                  imageUrl,
                   rating,
                   category,
                 })

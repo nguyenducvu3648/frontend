@@ -1,120 +1,106 @@
 import { FC, useEffect, useState } from "react";
+import axiosInstance from "../config/axios.config";
 
-interface Address {
-  address: string;
-  city: string;
-  postalCode: string;
-  state: string;
-}
-
-interface Company {
-  address: Address;
-  department: string;
+// Define the expected data structure based on the API response
+interface Role {
   name: string;
-  title: string;
+  description: string;
+  permissions: { name: string; description: string }[];
 }
 
-interface UserInfo {
-  id: number;
-  image: string;
+interface UserData {
+  id: string;
   username: string;
   firstName: string;
   lastName: string;
-  maidenName: string;
-  age: number;
-  gender: string;
-  email: string;
-  phone: string;
-  bloodGroup: string;
-  address: Address;
-  company: Company;
-  university: string;
+  dob: string;
+  roles: Role[];
 }
 
 const Profile: FC = () => {
-  const [info, setInfo] = useState<UserInfo>();
+  const [userInfo, setUserInfo] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true); // Add loading state
+  const [error, setError] = useState<string | null>(null); // Add error state
 
+  // Fetch user data when the component mounts using axios
   useEffect(() => {
-    fetch("https://dummyjson.com/users/1")
-      .then((res) => res.json())
-      .then((data) => {
-        setInfo(data);
-      });
-  }, []);
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("authToken"); // Get token from localStorage
+        if (!token) {
+          setError("No authentication token found.");
+          setLoading(false);
+          return;
+        }
 
+        // Call the API using axios with the authorization token
+        const response = await axiosInstance.get("http://localhost:8080/identity/users/myInfo", {
+         
+        });
+
+        if (response.data && response.data.data) {
+          setUserInfo(response.data.data); // Set user data to state
+        } else {
+          setError("Invalid response structure.");
+        }
+      } catch (error) {
+        setError("Error fetching user data.");
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false); // Set loading to false when done
+      }
+    };
+
+    fetchUserData(); // Call the fetch function
+  }, []); // Empty dependency array, will only run once when the component mounts
+
+  // Show a loading state if user data is not yet fetched
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // Show error message if there's an error
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  // Render the profile data once loaded
   return (
-    <div className="container mx-auto min-h-[83vh] w-full max-w-5xl dark:text-white">
-      <h1 className="text-4xl p-4 font-bold font-lora">Your Account</h1>
-      <div className="font-karla grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-1 p-4">
-        <img src={info?.image} alt="pp" className="text-center" />
-        <table>
-          <tbody>
-            <tr>
-              <td className="font-bold">Username</td>
-              <td>{info?.username}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">First Name</td>
-              <td>{info?.firstName}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">Last Name</td>
-              <td>{info?.lastName}</td>
-            </tr>
-            <tr>
-              <td className="font-bold w-32">Maiden Name</td>
-              <td>{info?.maidenName}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">Email</td>
-              <td>{info?.email}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">Phone</td>
-              <td>{info?.phone}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">University</td>
-              <td>{info?.university}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">Age</td>
-              <td>{info?.age}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">Gender</td>
-              <td>{info?.gender}</td>
-            </tr>
-            <tr>
-              <td className="font-bold">Blood Group</td>
-              <td>{info?.bloodGroup}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="space-y-2">
-          <div>
-            <h1 className="font-bold">Address</h1>
-            <p>{info?.address.address}</p>
-            <p>
-              {info?.address.city}, {info?.address.postalCode},{" "}
-              {info?.address.state}
-            </p>
-          </div>
-          <div>
-            <h1 className="font-bold">Company</h1>
-            <p>{info?.company.name}</p>
-            <p>{info?.company.title}</p>
-            <p>{info?.company.department}</p>
-            <p>{info?.company.address.address}</p>
-            <p>
-              {info?.company.address.city}, {info?.company.address.postalCode},{" "}
-              {info?.company.address.state}
-            </p>
-          </div>
-        </div>
-      </div>
+  <div className="container mx-auto min-h-[83vh] w-full max-w-5xl dark:text-white">
+    <h1 className="text-4xl p-4 font-bold font-lora">Your Account</h1>
+    <div className="font-karla grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-1 p-4">
+      {/* Profile Picture */}
+      <img src={`https://www.gravatar.com/avatar/${userInfo?.id}`} alt="Profile" className="text-center" />
+
+      {/* User Information Table */}
+      <table className="table-auto w-full">
+        <tbody>
+          <tr>
+            <td className="font-bold w-32">Username</td>
+            <td>{userInfo?.username}</td>
+          </tr>
+          <tr>
+            <td className="font-bold w-32">First Name</td>
+            <td>{userInfo?.firstName}</td>
+          </tr>
+          <tr>
+            <td className="font-bold w-32">Last Name</td>
+            <td>{userInfo?.lastName}</td>
+          </tr>
+          <tr>
+            <td className="font-bold w-32">Date of Birth</td>
+            <td>{userInfo?.dob}</td>
+          </tr>
+          <tr>
+            <td className="font-bold w-32">Roles</td>
+            <td>{userInfo?.roles?.map((role) => role.name).join(", ")}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Profile;

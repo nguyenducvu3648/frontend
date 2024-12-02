@@ -32,11 +32,11 @@ const SingleProduct: FC = () => {
       fetch(`https://dummyjson.com/products/${productID}`)
         .then((res) => res.json())
         .then((data) => {
-          const { thumbnail, images, category } = data;
+          const { imageUrl, images, category } = data;
           setProduct(data);
           setImgs(images);
           setScategory(category);
-          setSelectedImg(thumbnail);
+          setSelectedImg(imageUrl);
         });
     };
     fetchProductDetails();
@@ -67,7 +67,7 @@ const SingleProduct: FC = () => {
             title: product.title,
             category: product.category,
             rating: product.rating,
-            thumbnail: product.thumbnail,
+            imageUrl: product.imageUrl,
             discountPercentage: product.discountPercentage,
           })
         );
@@ -87,7 +87,7 @@ const SingleProduct: FC = () => {
             title: product.title,
             category: product.category,
             rating: product.rating,
-            thumbnail: product.thumbnail,
+            imageUrl: product.imageUrl,
             discountPercentage: product.discountPercentage,
           })
         );
